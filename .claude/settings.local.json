@@ -7,7 +7,18 @@
       "Bash(cp CLAUDE.md /tmp/CLAUDE.md.bak)",
       "Bash(cp /tmp/CLAUDE.md.bak CLAUDE.md)",
       "Bash(mv \"/Users/hanjuin/IT Project/budget-tracking-app/CLAUDE.md\" /tmp/CLAUDE.md.bak)",
-      "Bash(mv /tmp/CLAUDE.md.bak \"/Users/hanjuin/IT Project/budget-tracking-app/CLAUDE.md\")"
+      "Bash(mv /tmp/CLAUDE.md.bak \"/Users/hanjuin/IT Project/budget-tracking-app/CLAUDE.md\")",
+      "Bash(pnpm add:*)",
+      "Bash(mkdir -p \"/Users/hanjuin/IT Project/budget-tracking-app/supabase/migrations\")",
+      "Bash(mkdir -p \"/Users/hanjuin/IT Project/budget-tracking-app/app/\\(auth\\)/login\")",
+      "Bash(mkdir -p \"/Users/hanjuin/IT Project/budget-tracking-app/app/\\(auth\\)/auth/callback\")",
+      "Bash(mkdir -p \"/Users/hanjuin/IT Project/budget-tracking-app/app/\\(app\\)/quick-add\")",
+      "Bash(mkdir -p \"/Users/hanjuin/IT Project/budget-tracking-app/app/\\(app\\)/expenses\")",
+      "Bash(node -e ':*)",
+      "Bash(node scripts/generate-icons.mjs)",
+      "Bash(convert --version)",
+      "Bash(pnpm build:*)",
+      "Bash(ls \"/Users/hanjuin/IT Project/budget-tracking-app/.env\"*)"
     ]
   }
 }

@@ -1,7 +1,8 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  // Needed for Supabase realtime
+  serverExternalPackages: [],
+}
 
-export default nextConfig;
+export default nextConfig
