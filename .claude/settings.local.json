@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm create:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm --version)",
+      "Bash(cp CLAUDE.md /tmp/CLAUDE.md.bak)",
+      "Bash(cp /tmp/CLAUDE.md.bak CLAUDE.md)",
+      "Bash(mv \"/Users/hanjuin/IT Project/budget-tracking-app/CLAUDE.md\" /tmp/CLAUDE.md.bak)",
+      "Bash(mv /tmp/CLAUDE.md.bak \"/Users/hanjuin/IT Project/budget-tracking-app/CLAUDE.md\")"
+    ]
+  }
+}
