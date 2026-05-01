@@ -30,7 +30,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Public routes
-  const publicRoutes = ['/login', '/auth/callback', '/api/categories']
+  const publicRoutes = ['/login', '/auth/callback', '/api/categories', '/api/quick-add']
   if (publicRoutes.some((r) => pathname.startsWith(r))) {
     return supabaseResponse
   }

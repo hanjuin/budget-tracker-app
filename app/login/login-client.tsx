@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Wallet } from 'lucide-react'
 
@@ -17,6 +17,8 @@ export function LoginClient() {
 
   const supabase = createClient()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') ?? '/'
 
   async function handleSignIn() {
     if (!selected) return
@@ -31,7 +33,7 @@ export function LoginClient() {
 
     setLoading(false)
     if (error) setError(error.message)
-    else router.push('/')
+    else router.push(redirectTo)
   }
 
   return (
