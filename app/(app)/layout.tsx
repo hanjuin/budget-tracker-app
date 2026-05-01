@@ -1,6 +1,7 @@
 import { BottomNav } from '@/components/bottom-nav'
 import { ToastContainer } from '@/components/toast'
 import { ThemeProvider } from '@/components/theme-provider'
+import { PullToRefresh } from '@/components/pull-to-refresh'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -21,6 +22,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <>
       <ThemeProvider displayName={displayName} />
       <ToastContainer />
+      <PullToRefresh />
       <main className="pb-20 min-h-screen">{children}</main>
       <BottomNav />
     </>

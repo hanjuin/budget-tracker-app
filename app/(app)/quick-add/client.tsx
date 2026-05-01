@@ -153,7 +153,7 @@ export function QuickAddClient() {
   const canSave = amount && parseFloat(amount) > 0 && selectedCategory && selectedAccount
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 flex flex-col safe-top">
+    <div className="h-screen overflow-hidden bg-white dark:bg-zinc-950 flex flex-col safe-top">
       <div className="px-4 pt-4 pb-2">
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">Quick Add</h1>
       </div>
