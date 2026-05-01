@@ -74,7 +74,6 @@ export function ExpensesClient() {
   }, [fetchExpenses, supabase])
 
   async function deleteExpense(id: string) {
-    // Optimistic remove
     setExpenses((prev) => prev.filter((e) => e.id !== id))
     const { error } = await supabase.from('expenses').delete().eq('id', id)
     if (error) {
@@ -92,9 +91,7 @@ export function ExpensesClient() {
 
   function handleTouchEnd(e: React.TouchEvent, id: string) {
     const dx = touchStartX.current - e.changedTouches[0].clientX
-    if (dx > 80) {
-      deleteExpense(id)
-    }
+    if (dx > 80) deleteExpense(id)
     setSwiping(null)
   }
 
@@ -117,18 +114,18 @@ export function ExpensesClient() {
   return (
     <div className="safe-top pt-6 pb-4">
       <div className="px-4 mb-4">
-        <h1 className="text-2xl font-bold text-white">Expenses</h1>
-        <p className="text-zinc-500 text-sm mt-0.5">Swipe left to delete</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Expenses</h1>
+        <p className="text-gray-400 dark:text-zinc-500 text-sm mt-0.5">Swipe left to delete</p>
       </div>
 
       {expenses.length === 0 ? (
-        <div className="px-4 py-16 text-center text-zinc-600 text-sm">No expenses yet</div>
+        <div className="px-4 py-16 text-center text-gray-400 dark:text-zinc-600 text-sm">No expenses yet</div>
       ) : (
         <div className="space-y-4">
           {Array.from(grouped.entries()).map(([dateLabel, exps]) => (
             <div key={dateLabel}>
-              <p className="px-4 text-xs text-zinc-500 uppercase tracking-wider mb-2">{dateLabel}</p>
-              <div className="bg-zinc-900 border-y border-zinc-800 divide-y divide-zinc-800 overflow-hidden">
+              <p className="px-4 text-xs text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-2">{dateLabel}</p>
+              <div className="bg-gray-50 dark:bg-zinc-900 border-y border-gray-200 dark:border-zinc-800 divide-y divide-gray-200 dark:divide-zinc-800 overflow-hidden">
                 {exps.map((exp) => (
                   <div
                     key={exp.id}
@@ -136,34 +133,32 @@ export function ExpensesClient() {
                     onTouchStart={(e) => handleTouchStart(e, exp.id)}
                     onTouchEnd={(e) => handleTouchEnd(e, exp.id)}
                   >
-                    {/* Delete indicator */}
                     <div className="absolute inset-y-0 right-0 flex items-center px-6 bg-red-900">
                       <Trash2 className="w-5 h-5 text-red-400" />
                     </div>
-
                     <div
-                      className={`relative bg-zinc-900 flex items-center justify-between px-4 py-3 transition-transform ${
+                      className={`relative bg-gray-50 dark:bg-zinc-900 flex items-center justify-between px-4 py-3 transition-transform ${
                         swiping === exp.id ? '-translate-x-16' : 'translate-x-0'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-semibold text-zinc-400">
+                        <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-zinc-800 flex items-center justify-center text-xs font-semibold text-gray-500 dark:text-zinc-400">
                           {exp.user_id === userId ? 'Me' : 'Bv'}
                         </div>
                         <div>
-                          <p className="text-sm text-white capitalize">{exp.categories?.name ?? 'Other'}</p>
-                          <p className="text-xs text-zinc-500">
+                          <p className="text-sm text-gray-900 dark:text-white capitalize">{exp.categories?.name ?? 'Other'}</p>
+                          <p className="text-xs text-gray-400 dark:text-zinc-500">
                             {exp.accounts?.name?.replace(/_/g, ' ') ?? ''}
                             {exp.note ? ` · ${exp.note}` : ''}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-white font-medium">{formatMoney(exp.amount)}</span>
+                        <span className="text-gray-900 dark:text-white font-medium">{formatMoney(exp.amount)}</span>
                         {exp.user_id === userId && (
                           <button
                             onClick={() => deleteExpense(exp.id)}
-                            className="text-zinc-600 active:text-red-400 p-1"
+                            className="text-gray-300 dark:text-zinc-600 active:text-red-400 p-1"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -180,7 +175,7 @@ export function ExpensesClient() {
             <div className="px-4">
               <button
                 onClick={loadMore}
-                className="w-full py-3 flex items-center justify-center gap-2 text-zinc-400 text-sm bg-zinc-900 rounded-2xl border border-zinc-800"
+                className="w-full py-3 flex items-center justify-center gap-2 text-gray-500 dark:text-zinc-400 text-sm bg-gray-50 dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800"
               >
                 <ChevronDown className="w-4 h-4" />
                 Load more

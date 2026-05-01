@@ -10,9 +10,9 @@ export interface Database {
   public: {
     Tables: {
       profiles: {
-        Row: { id: string; display_name: string; weekly_income: number; created_at: string }
-        Insert: { id: string; display_name: string; weekly_income: number; created_at?: string }
-        Update: { id?: string; display_name?: string; weekly_income?: number; created_at?: string }
+        Row: { id: string; display_name: string; weekly_income: number; savings_target_weekly: number; created_at: string }
+        Insert: { id: string; display_name: string; weekly_income: number; savings_target_weekly?: number; created_at?: string }
+        Update: { id?: string; display_name?: string; weekly_income?: number; savings_target_weekly?: number; created_at?: string }
         Relationships: []
       }
       accounts: {
@@ -22,9 +22,9 @@ export interface Database {
         Relationships: []
       }
       categories: {
-        Row: { id: string; name: string; icon: string | null; is_joint: boolean; sort_order: number }
-        Insert: { id?: string; name: string; icon?: string | null; is_joint?: boolean; sort_order?: number }
-        Update: { id?: string; name?: string; icon?: string | null; is_joint?: boolean; sort_order?: number }
+        Row: { id: string; name: string; icon: string | null; is_joint: boolean; sort_order: number; default_account_id: string | null }
+        Insert: { id?: string; name: string; icon?: string | null; is_joint?: boolean; sort_order?: number; default_account_id?: string | null }
+        Update: { id?: string; name?: string; icon?: string | null; is_joint?: boolean; sort_order?: number; default_account_id?: string | null }
         Relationships: []
       }
       expenses: {

@@ -23,11 +23,6 @@ export interface TransferInstruction {
   amount: number
 }
 
-// Personal savings targets (weekly)
-export const SAVINGS_TARGETS: Record<string, number> = {
-  HJ: 655,
-  Bev: 530,
-}
 
 export function normalizeToWeekly(amount: number, frequency: 'weekly' | 'monthly'): number {
   if (frequency === 'weekly') return amount
@@ -69,7 +64,7 @@ export function getWeeklySummary(input: WeeklySummaryInput): WeeklySummary {
     .filter((r) => r.active && r.user_id === profile.id)
     .reduce((sum, r) => sum + normalizeToWeekly(r.amount, r.frequency), 0)
 
-  const personalSavingsTarget = SAVINGS_TARGETS[profile.display_name] ?? 0
+  const personalSavingsTarget = profile.savings_target_weekly ?? 0
 
   // BV loan: only HJ pays
   const bvLoanRepayment = isHJ && loan ? loan.weekly_repayment : 0
@@ -87,12 +82,12 @@ export function getWeeklySummary(input: WeeklySummaryInput): WeeklySummary {
   const transfers: TransferInstruction[] = [
     {
       label: 'Joint daily (shared expenses)',
-      account: 'joint_daily',
+      account: 'Joint Daily',
       amount: jointShare,
     },
     {
       label: `Personal savings (${profile.display_name})`,
-      account: isHJ ? 'hj_personal_save' : 'bev_personal_save',
+      account: isHJ ? 'HJ Savings' : 'Bev Savings',
       amount: personalSavingsTarget,
     },
   ]
@@ -100,7 +95,7 @@ export function getWeeklySummary(input: WeeklySummaryInput): WeeklySummary {
   if (isHJ && loan) {
     transfers.push({
       label: 'BV loan repayment',
-      account: 'bv_loan',
+      account: 'BV Loan',
       amount: loan.weekly_repayment,
     })
   }
@@ -108,7 +103,7 @@ export function getWeeklySummary(input: WeeklySummaryInput): WeeklySummary {
   if (jointSavingContribution > 0) {
     transfers.push({
       label: 'Joint savings',
-      account: 'joint_saving',
+      account: 'Joint Saving',
       amount: jointSavingContribution,
     })
   }
@@ -128,6 +123,10 @@ export function getWeeklySummary(input: WeeklySummaryInput): WeeklySummary {
     transferInstructions: transfers,
     jointExpenses: jointExpenseConfigs,
   }
+}
+
+export function formatAccountName(name: string): string {
+  return name.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 export function formatMoney(amount: number): string {
