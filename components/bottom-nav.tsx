@@ -15,7 +15,7 @@ export function BottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-zinc-900 border-t border-zinc-800 safe-bottom z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800 safe-bottom z-50">
       <div className="grid grid-cols-4 h-14">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || (href !== '/' && pathname.startsWith(href))
@@ -24,7 +24,7 @@ export function BottomNav() {
               key={href}
               href={href}
               className={`flex flex-col items-center justify-center gap-0.5 text-xs transition-colors ${
-                active ? 'text-accent-400' : 'text-zinc-500'
+                active ? 'text-accent-400' : 'text-gray-400 dark:text-zinc-500'
               }`}
             >
               <Icon className="w-5 h-5" />
