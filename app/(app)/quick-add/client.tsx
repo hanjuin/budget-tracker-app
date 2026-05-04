@@ -7,6 +7,8 @@ import { toast } from '@/components/toast'
 import { Check } from 'lucide-react'
 import { formatAccountName } from '@/lib/weekly-summary'
 import type { Category, Account } from '@/lib/supabase/types'
+import { useAppContext } from '@/lib/context/app-context'
+import { fetchCategories, fetchAccounts } from '@/lib/supabase/cache'
 
 
 function getDefaultAccount(cat: Category, accounts: Account[], userId: string): string | null {
@@ -27,7 +29,7 @@ export function QuickAddClient() {
 
   const [categories, setCategories] = useState<Category[]>([])
   const [accounts, setAccounts] = useState<Account[]>([])
-  const [userId, setUserId] = useState<string | null>(null)
+  const { userId } = useAppContext()
 
   const [amount, setAmount] = useState(paramAmount ?? '')
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
@@ -38,32 +40,29 @@ export function QuickAddClient() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-      setUserId(user.id)
-
-      const [{ data: cats }, { data: accts }] = await Promise.all([
-        supabase.from('categories').select('*').order('sort_order').returns<Category[]>(),
-        supabase.from('accounts').select('*').order('name').returns<Account[]>(),
+      const [cats, accts] = await Promise.all([
+        fetchCategories(supabase),
+        fetchAccounts(supabase),
       ])
 
-      if (cats) setCategories(cats)
-      if (accts) setAccounts(accts)
+      setCategories(cats)
+      setAccounts(accts)
 
-      if (paramCategory && cats && accts) {
+      if (paramCategory) {
         const cat = cats.find((c) => c.name === paramCategory)
         if (cat) {
           setSelectedCategory(cat)
-          if (!paramAccount) setSelectedAccount(getDefaultAccount(cat, accts, user.id))
+          if (!paramAccount) setSelectedAccount(getDefaultAccount(cat, accts, userId))
         }
       }
     }
     load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paramCategory, paramAccount])
 
   const handleCategorySelect = (cat: Category) => {
     setSelectedCategory(cat)
-    if (!selectedAccount) setSelectedAccount(getDefaultAccount(cat, accounts, userId ?? ''))
+    if (!selectedAccount) setSelectedAccount(getDefaultAccount(cat, accounts, userId))
   }
 
   const logExpense = useCallback(async (amt: string, cat: Category | null, acctName: string | null) => {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from '@/components/toast'
 import type { Recurring, JointExpenseConfig, Loan, Profile, Account, Category } from '@/lib/supabase/types'
@@ -8,6 +8,7 @@ import { formatAccountName } from '@/lib/weekly-summary'
 import { LogOut, ToggleLeft, ToggleRight, Sun, Moon, Trash2, Plus, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useDarkMode } from '@/components/theme-provider'
+import { invalidateCategories } from '@/lib/supabase/cache'
 
 function getNextDueAt(frequency: 'weekly' | 'monthly'): string {
   const today = new Date()
@@ -21,49 +22,38 @@ function getNextDueAt(frequency: 'weekly' | 'monthly'): string {
   return new Date(today.getFullYear(), today.getMonth() + 1, 1).toISOString().split('T')[0]
 }
 
-export function SettingsClient() {
+interface SettingsClientProps {
+  profile: Profile
+  recurring: Recurring[]
+  jointConfigs: JointExpenseConfig[]
+  loan: Loan | null
+  accounts: Account[]
+  categories: Category[]
+}
+
+export function SettingsClient({
+  profile: initialProfile,
+  recurring: initialRecurring,
+  jointConfigs: initialJointConfigs,
+  loan: initialLoan,
+  accounts: initialAccounts,
+  categories: initialCategories,
+}: SettingsClientProps) {
   const supabase = createClient()
   const router = useRouter()
   const { mode, toggle } = useDarkMode()
 
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [recurring, setRecurring] = useState<Recurring[]>([])
-  const [jointConfigs, setJointConfigs] = useState<JointExpenseConfig[]>([])
-  const [loan, setLoan] = useState<Loan | null>(null)
-  const [accounts, setAccounts] = useState<Account[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
+  const [profile, setProfile] = useState<Profile>(initialProfile)
+  const [recurring, setRecurring] = useState<Recurring[]>(initialRecurring)
+  const [jointConfigs, setJointConfigs] = useState<JointExpenseConfig[]>(initialJointConfigs)
+  const [loan, setLoan] = useState<Loan | null>(initialLoan)
+  const [accounts] = useState<Account[]>(initialAccounts)
+  const [categories, setCategories] = useState<Category[]>(initialCategories)
 
   const [newJoint, setNewJoint] = useState<{ name: string; weekly_amount: string; hj_split_pct: string; bev_split_pct: string } | null>(null)
   const [newRecurring, setNewRecurring] = useState<{ name: string; amount: string; frequency: 'weekly' | 'monthly'; category_id: string; account_id: string } | null>(null)
 
-  useEffect(() => {
-    async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const [{ data: prof }, { data: rec }, { data: jc }, { data: ln }, { data: accts }, { data: cats }] = await Promise.all([
-        supabase.from('profiles').select('*').eq('id', user.id).single(),
-        supabase.from('recurring').select('*').order('name'),
-        supabase.from('joint_expense_config').select('*').order('name'),
-        supabase.from('loans').select('*').eq('debtor_id', user.id).maybeSingle(),
-        supabase.from('accounts').select('*').order('name'),
-        supabase.from('categories').select('*').order('sort_order'),
-      ])
-
-      setProfile(prof)
-      setRecurring(rec ?? [])
-      setJointConfigs(jc ?? [])
-      setLoan(ln ?? null)
-      setAccounts(accts ?? [])
-      setCategories(cats ?? [])
-      setLoading(false)
-    }
-    load()
-  }, [supabase])
-
   async function updateProfile(field: 'weekly_income' | 'savings_target_weekly', value: string) {
-    if (!profile) return
     const num = parseFloat(value)
     if (isNaN(num)) return
     setProfile({ ...profile, [field]: num })
@@ -95,7 +85,7 @@ export function SettingsClient() {
   }
 
   async function addRecurring() {
-    if (!newRecurring || !profile) return
+    if (!newRecurring) return
     const amount = parseFloat(newRecurring.amount)
     if (!newRecurring.name || isNaN(amount) || !newRecurring.category_id || !newRecurring.account_id) {
       toast.error('Fill in all fields')
@@ -188,20 +178,12 @@ export function SettingsClient() {
     setCategories(prev => prev.map(c => c.id === categoryId ? { ...c, default_account_id: accountId } : c))
     const { error } = await supabase.from('categories').update({ default_account_id: accountId }).eq('id', categoryId)
     if (error) toast.error('Failed to update')
-    else toast.success('Updated')
+    else { invalidateCategories(); toast.success('Updated') }
   }
 
   async function handleSignOut() {
     await supabase.auth.signOut()
     router.push('/login')
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-accent-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
   }
 
   const inputClass = "w-full bg-gray-100 dark:bg-zinc-800 rounded-lg px-2 py-1.5 text-sm text-gray-900 dark:text-white outline-none focus:ring-1 focus:ring-accent-500"
@@ -224,29 +206,27 @@ export function SettingsClient() {
       </div>
 
       {/* Profile */}
-      {profile && (
-        <section>
-          <h2 className="text-xs text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-3">Profile</h2>
-          <div className="bg-gray-50 dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-4 space-y-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500 dark:text-zinc-400">Name</span>
-              <span className="text-gray-900 dark:text-white font-medium">{profile.display_name}</span>
-            </div>
-            <div>
-              <label className="text-xs text-gray-400 dark:text-zinc-500 block mb-1">Weekly income ($)</label>
-              <input type="number" defaultValue={profile.weekly_income}
-                onBlur={(e) => updateProfile('weekly_income', e.target.value)}
-                className={inputClass} inputMode="decimal" />
-            </div>
-            <div>
-              <label className="text-xs text-gray-400 dark:text-zinc-500 block mb-1">Savings target ($/wk)</label>
-              <input type="number" defaultValue={profile.savings_target_weekly}
-                onBlur={(e) => updateProfile('savings_target_weekly', e.target.value)}
-                className={inputClass} inputMode="decimal" />
-            </div>
+      <section>
+        <h2 className="text-xs text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-3">Profile</h2>
+        <div className="bg-gray-50 dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-4 space-y-3">
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-500 dark:text-zinc-400">Name</span>
+            <span className="text-gray-900 dark:text-white font-medium">{profile.display_name}</span>
           </div>
-        </section>
-      )}
+          <div>
+            <label className="text-xs text-gray-400 dark:text-zinc-500 block mb-1">Weekly income ($)</label>
+            <input type="number" defaultValue={profile.weekly_income}
+              onBlur={(e) => updateProfile('weekly_income', e.target.value)}
+              className={inputClass} inputMode="decimal" />
+          </div>
+          <div>
+            <label className="text-xs text-gray-400 dark:text-zinc-500 block mb-1">Savings target ($/wk)</label>
+            <input type="number" defaultValue={profile.savings_target_weekly}
+              onBlur={(e) => updateProfile('savings_target_weekly', e.target.value)}
+              className={inputClass} inputMode="decimal" />
+          </div>
+        </div>
+      </section>
 
       {/* Joint Expenses */}
       <section>

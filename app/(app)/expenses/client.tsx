@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useAppContext } from '@/lib/context/app-context'
 import { formatMoney } from '@/lib/weekly-summary'
 import { toast } from '@/components/toast'
 import { format, isToday, isYesterday, isThisWeek } from 'date-fns'
@@ -40,8 +41,8 @@ function groupByDate(expenses: ExpenseRow[]): Map<string, ExpenseRow[]> {
 
 export function ExpensesClient() {
   const supabase = createClient()
+  const { userId } = useAppContext()
   const [expenses, setExpenses] = useState<ExpenseRow[]>([])
-  const [userId, setUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [hasMore, setHasMore] = useState(true)
   const [offset, setOffset] = useState(0)
@@ -67,11 +68,8 @@ export function ExpensesClient() {
   }, [supabase])
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) setUserId(user.id)
-    })
     fetchExpenses(0)
-  }, [fetchExpenses, supabase])
+  }, [fetchExpenses])
 
   async function deleteExpense(id: string) {
     setExpenses((prev) => prev.filter((e) => e.id !== id))

@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { getAuthUser } from '@/lib/supabase/get-user'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { DashboardClient } from './dashboard-client'
@@ -7,9 +8,9 @@ import { getWeeklySummary, getWeekStart } from '@/lib/weekly-summary'
 import { startOfWeek, endOfWeek } from 'date-fns'
 
 export default async function DashboardPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await getAuthUser()
   if (!user) redirect('/login')
+  const supabase = await createClient()
   const weekStart = getWeekStart()
   const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 })
 
